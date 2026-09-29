@@ -1,0 +1,1053 @@
+/* ============================================================
+   Lab Memory & Onboarding  --  self-contained styles
+   prefix: labmem-
+   ============================================================ */
+
+/* ---------- page wrapper ---------- */
+.labmem-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 0 64px;
+  animation: labmem-fadeIn .45s ease both;
+}
+
+@keyframes labmem-fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- header ---------- */
+.labmem-header {
+  padding: 54px 0 36px;
+}
+.labmem-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.labmem-kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #879596;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+.labmem-kicker-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff9900;
+  box-shadow: 0 0 0 3px rgba(255, 153, 0, .15);
+}
+.labmem-title {
+  margin: 14px 0 10px;
+  color: #16191f;
+  font-size: clamp(36px, 4.4vw, 54px);
+  font-weight: 400;
+  letter-spacing: -2.5px;
+  line-height: .97;
+}
+.labmem-title em {
+  color: #ff9900;
+  font-style: italic;
+}
+.labmem-subtitle {
+  max-width: 520px;
+  margin: 0;
+  color: #879596;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ---------- add knowledge button ---------- */
+.labmem-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  background: #ff9900;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s;
+  margin-top: 18px;
+  flex-shrink: 0;
+}
+.labmem-add-btn:hover {
+  background: #ec7211;
+}
+.labmem-add-btn-icon {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+/* ---------- stats row ---------- */
+.labmem-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.labmem-stat-card {
+  padding: 18px 17px;
+  border: 1px solid #d5dbdb;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .035);
+}
+.labmem-stat-label {
+  display: block;
+  color: #879596;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.labmem-stat-value {
+  display: block;
+  color: #16191f;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -1.2px;
+  line-height: 1;
+}
+.labmem-stat-note {
+  display: block;
+  margin-top: 6px;
+  color: #1d8102;
+  font-size: 10px;
+  font-weight: 600;
+}
+.labmem-stat-note.neutral {
+  color: #879596;
+}
+
+/* ---------- tabs ---------- */
+.labmem-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid #d5dbdb;
+  padding-bottom: 0;
+}
+.labmem-tab {
+  border: 0;
+  background: transparent;
+  padding: 10px 18px 12px;
+  color: #879596;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .2s, border-color .2s;
+}
+.labmem-tab:hover {
+  color: #16191f;
+}
+.labmem-tab.active {
+  color: #16191f;
+  border-bottom-color: #ff9900;
+}
+
+/* ---------- search bar ---------- */
+.labmem-search-section {
+  margin-bottom: 28px;
+}
+.labmem-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 16px;
+  border: 1px solid #d5dbdb;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .035);
+  margin-bottom: 14px;
+}
+.labmem-search-icon {
+  color: #b3afb1;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.labmem-search-bar input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #545b64;
+  font-size: 13px;
+  background: transparent;
+}
+.labmem-search-bar input::placeholder {
+  color: #b3afb1;
+}
+.labmem-search-count {
+  flex-shrink: 0;
+  color: #b3afb1;
+  font-size: 10px;
+  font-weight: 600;
+}
+.labmem-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.labmem-chip {
+  border: 1px solid #d5dbdb;
+  background: #fff;
+  padding: 6px 13px;
+  border-radius: 20px;
+  color: #6d6974;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.labmem-chip:hover {
+  border-color: #b5d6e9;
+  color: #232f3e;
+}
+.labmem-chip.active {
+  background: #232f3e;
+  border-color: #232f3e;
+  color: #fff;
+}
+
+/* ---------- remember banner ---------- */
+.labmem-remember-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 16px;
+  background: #f2f3f3;
+  border: 1px solid #d5dbdb;
+  border-radius: 8px;
+  color: #545b64;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.labmem-remember-banner code {
+  background: #232f3e;
+  color: #ff9900;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ---------- two-column layout ---------- */
+.labmem-body {
+  display: grid;
+  grid-template-columns: 1fr 370px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ---------- knowledge entry cards ---------- */
+.labmem-entries {
+  display: grid;
+  gap: 10px;
+}
+.labmem-entry {
+  padding: 18px 19px 16px;
+  border: 1px solid #d5dbdb;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .035);
+  cursor: pointer;
+  transition: box-shadow .2s, border-color .2s;
+}
+.labmem-entry:hover {
+  border-color: #b5d6e9;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .06);
+}
+.labmem-entry-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.labmem-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+}
+.labmem-badge.decision     { background: #fff5e6; color: #0073bb; }
+.labmem-badge.failed       { background: #fdf3f1; color: #c97060; }
+.labmem-badge.protocol     { background: #e1f0e5; color: #518a5e; }
+.labmem-badge.convention   { background: #e8ecf4; color: #5b73a0; }
+.labmem-badge.equipment    { background: #fef3dc; color: #a07830; }
+.labmem-badge.method       { background: #e5eef4; color: #4b7ea0; }
+.labmem-badge.datasource   { background: #dff0f0; color: #3f8585; }
+.labmem-badge.onboarding   { background: #fff5e6; color: #ff9900; }
+.labmem-entry-date {
+  margin-left: auto;
+  color: #b3afb0;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+.labmem-entry-title {
+  margin: 0 0 6px;
+  color: #16191f;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -.3px;
+  line-height: 1.25;
+}
+.labmem-entry-summary {
+  margin: 0 0 12px;
+  color: #545b64;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.labmem-entry-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.labmem-contributor {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.labmem-contributor .labmem-avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 8px;
+}
+.labmem-contributor-name {
+  color: #16191f;
+  font-size: 11px;
+  font-weight: 600;
+}
+.labmem-upvotes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: #ff9900;
+  font-size: 11px;
+  font-weight: 600;
+}
+.labmem-upvote-icon {
+  font-style: normal;
+}
+.labmem-tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  width: 100%;
+}
+.labmem-tag {
+  padding: 2px 8px;
+  background: #fafafa;
+  border-radius: 4px;
+  color: #879596;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+/* remember badge on entries */
+.labmem-remember-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: #f2f3f3;
+  border: 1px solid #d5dbdb;
+  font-size: 9px;
+  font-weight: 700;
+  color: #545b64;
+  letter-spacing: .3px;
+}
+.labmem-remember-tag code {
+  background: #232f3e;
+  color: #ff9900;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+/* expanded entry detail */
+.labmem-entry-detail {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eeedea;
+  color: #545b64;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.labmem-entry-detail p {
+  margin: 0 0 8px;
+}
+
+/* ---------- avatar (shared) ---------- */
+.labmem-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 33px;
+  height: 33px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}
+.labmem-avatar.purple { background: #0073bb; }
+.labmem-avatar.coral  { background: #d13212; }
+.labmem-avatar.blue   { background: #0073bb; }
+.labmem-avatar.gold   { background: #ff9900; }
+.labmem-avatar.teal   { background: #067f68; }
+.labmem-avatar.green  { background: #067f68; }
+
+/* ---------- right column ---------- */
+.labmem-sidebar {
+  display: grid;
+  gap: 14px;
+}
+
+/* ---------- AI onboarding panel ---------- */
+.labmem-ai-panel {
+  position: relative;
+  padding: 22px 20px 18px;
+  background: #232f3e;
+  color: #fff;
+  border-radius: 11px;
+  overflow: hidden;
+}
+.labmem-ai-panel::after {
+  content: '\2726';
+  position: absolute;
+  right: -12px;
+  top: -20px;
+  color: #37475a;
+  font-size: 110px;
+  transform: rotate(14deg);
+  pointer-events: none;
+}
+.labmem-ai-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #ffd699;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.labmem-ai-spark {
+  color: #f2a77c;
+  font-size: 15px;
+}
+.labmem-ai-title {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 16px;
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: -.4px;
+  line-height: 1.2;
+}
+.labmem-chat {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+}
+.labmem-chat-msg {
+  padding: 11px 13px;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.labmem-chat-msg.ai {
+  background: #2d3a4a;
+  color: #ddd5e3;
+}
+.labmem-chat-msg.user {
+  background: #56476a;
+  color: #f0eaf4;
+  margin-left: 18px;
+}
+.labmem-chat-msg .labmem-chat-sender {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.labmem-chat-msg.ai .labmem-chat-sender {
+  color: #c4a1d6;
+}
+.labmem-chat-msg.user .labmem-chat-sender {
+  color: #b8a4cd;
+}
+.labmem-chat-ref {
+  display: inline;
+  color: #ec7211;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* chat input row (sidebar) */
+.labmem-chat-input-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  position: relative;
+  z-index: 1;
+}
+.labmem-chat-input {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid #37475a;
+  background: #1a2332;
+  color: #f0eaf4;
+  font-size: 11px;
+  outline: none;
+}
+.labmem-chat-input:focus { border-color: #ec7211; }
+.labmem-chat-input:disabled { opacity: .5; }
+.labmem-chat-send {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 7px;
+  background: #ec7211;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+}
+.labmem-chat-send:disabled { opacity: .4; cursor: default; }
+.labmem-chat-send:not(:disabled):hover { background: #f58b36; }
+
+/* typing indicator */
+.labmem-typing {
+  color: #999;
+  font-style: italic;
+}
+@keyframes labmem-pulse {
+  0%,100% { opacity: .4; }
+  50% { opacity: 1; }
+}
+.labmem-typing { animation: labmem-pulse 1.5s ease-in-out infinite; }
+
+/* source tags on chat messages */
+.labmem-chat-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.labmem-chat-source-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+.labmem-chat-source-tag.knowledge-base {
+  background: #1a3a2a;
+  color: #6fdc8c;
+}
+.labmem-chat-source-tag.discussion {
+  background: #2d2a3e;
+  color: #c4a1d6;
+}
+.labmem-chat-source-tag.lab-memory {
+  background: #3a2d1a;
+  color: #ffd699;
+}
+
+/* full-chat input (onboarding tab) */
+.labmem-full-chat-input {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+  margin-top: 4px;
+}
+.labmem-full-chat-input input {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: 9px;
+  border: 1px solid #37475a;
+  background: #1a2332;
+  color: #f0eaf4;
+  font-size: 12px;
+  outline: none;
+}
+.labmem-full-chat-input input:focus { border-color: #ec7211; }
+.labmem-full-chat-input input:disabled { opacity: .5; }
+.labmem-full-chat-input button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 9px;
+  background: #ec7211;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+.labmem-full-chat-input button:disabled { opacity: .4; cursor: default; }
+.labmem-full-chat-input button:not(:disabled):hover { background: #f58b36; }
+
+/* ---------- recently added ---------- */
+.labmem-recent-panel {
+  padding: 18px 17px 14px;
+  border: 1px solid #d5dbdb;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .035);
+}
+.labmem-recent-heading {
+  color: #879596;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+.labmem-recent-list {
+  display: grid;
+  gap: 12px;
+}
+.labmem-recent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.labmem-recent-item .labmem-avatar {
+  width: 26px;
+  height: 26px;
+  font-size: 8px;
+  margin-top: 1px;
+}
+.labmem-recent-info {
+  flex: 1;
+  min-width: 0;
+}
+.labmem-recent-title {
+  color: #16191f;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 2px;
+}
+.labmem-recent-meta {
+  color: #b3afb0;
+  font-size: 9px;
+}
+.labmem-recent-time {
+  color: #1d8102;
+  font-weight: 700;
+}
+
+/* ---------- knowledge graph ---------- */
+.labmem-graph-panel {
+  padding: 18px 17px 20px;
+  border: 1px solid #d5dbdb;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .035);
+}
+.labmem-graph-heading {
+  color: #879596;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  margin: 0 0 18px;
+}
+.labmem-graph {
+  position: relative;
+  height: 180px;
+}
+.labmem-node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 8px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.15;
+  color: #fff;
+  z-index: 2;
+  transition: transform .2s;
+}
+.labmem-node:hover {
+  transform: scale(1.12);
+}
+.labmem-node.hub {
+  width: 66px;
+  height: 66px;
+  background: #ff9900;
+  top: 54px;
+  left: 50%;
+  margin-left: -33px;
+  font-size: 9px;
+}
+.labmem-node.n1 {
+  width: 52px;
+  height: 52px;
+  background: #ec7211;
+  top: 10px;
+  left: 16%;
+}
+.labmem-node.n2 {
+  width: 44px;
+  height: 44px;
+  background: #0073bb;
+  top: 4px;
+  right: 18%;
+}
+.labmem-node.n3 {
+  width: 48px;
+  height: 48px;
+  background: #ff9900;
+  bottom: 12px;
+  left: 12%;
+}
+.labmem-node.n4 {
+  width: 40px;
+  height: 40px;
+  background: #067f68;
+  bottom: 8px;
+  right: 14%;
+}
+.labmem-node.n5 {
+  width: 36px;
+  height: 36px;
+  background: #067f68;
+  top: 0;
+  left: 46%;
+}
+/* connection lines (pseudo-elements on a wrapper) */
+.labmem-graph-line {
+  position: absolute;
+  z-index: 1;
+  background: #ddd9d3;
+  transform-origin: 0 0;
+}
+.labmem-graph-line.l1 { width: 130px; height: 1px; top: 90px; left: calc(16% + 40px); transform: rotate(-18deg); }
+.labmem-graph-line.l2 { width: 110px; height: 1px; top: 78px; left: calc(50% + 10px); transform: rotate(-28deg); }
+.labmem-graph-line.l3 { width: 120px; height: 1px; top: 100px; left: calc(12% + 36px); transform: rotate(18deg); }
+.labmem-graph-line.l4 { width: 100px; height: 1px; top: 102px; left: calc(50% + 20px); transform: rotate(24deg); }
+.labmem-graph-line.l5 { width: 80px; height: 1px; top: 68px; left: calc(46% + 10px); transform: rotate(-58deg); }
+.labmem-node-count {
+  display: block;
+  font-size: 7px;
+  font-weight: 600;
+  opacity: .8;
+  margin-top: 1px;
+}
+
+/* ---------- onboarding view ---------- */
+.labmem-onboarding {
+  display: grid;
+  gap: 28px;
+}
+.labmem-onboarding-intro {
+  padding: 28px 26px;
+  background: #232f3e;
+  color: #fff;
+  border-radius: 11px;
+  position: relative;
+  overflow: hidden;
+}
+.labmem-onboarding-intro::after {
+  content: '\2726';
+  position: absolute;
+  right: -16px;
+  top: -24px;
+  color: #37475a;
+  font-size: 130px;
+  transform: rotate(14deg);
+  pointer-events: none;
+}
+.labmem-onboarding-intro h3 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 10px;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -.6px;
+}
+.labmem-onboarding-intro p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: #8d99a8;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 600px;
+}
+.labmem-onboarding-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.labmem-onboarding-card {
+  padding: 20px 19px;
+  border: 1px solid #d5dbdb;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .035);
+}
+.labmem-onboarding-card h4 {
+  margin: 0 0 6px;
+  color: #16191f;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -.3px;
+}
+.labmem-onboarding-card p {
+  margin: 0;
+  color: #545b64;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.labmem-onboarding-card .labmem-badge {
+  margin-bottom: 10px;
+}
+.labmem-ob-step-num {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff5e6;
+  color: #ff9900;
+  font-size: 10px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.labmem-full-chat {
+  display: grid;
+  gap: 14px;
+  padding: 24px 22px;
+  background: #232f3e;
+  border-radius: 11px;
+  position: relative;
+  overflow: hidden;
+}
+.labmem-full-chat::after {
+  content: '\2726';
+  position: absolute;
+  right: -16px;
+  bottom: -28px;
+  color: #37475a;
+  font-size: 130px;
+  transform: rotate(14deg);
+  pointer-events: none;
+}
+.labmem-full-chat .labmem-chat-msg {
+  position: relative;
+  z-index: 1;
+}
+.labmem-full-chat-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #ffd699;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+/* ---------- no results ---------- */
+.labmem-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #879596;
+  font-size: 13px;
+}
+.labmem-empty-icon {
+  display: block;
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: #b5d6e9;
+}
+
+/* ---------- modal ---------- */
+.labmem-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  animation: labmem-fadeIn .2s ease both;
+}
+.labmem-modal {
+  width: 520px;
+  max-width: 92vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
+}
+.labmem-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 24px 0;
+}
+.labmem-modal-header h3 {
+  margin: 0;
+  color: #16191f;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -.3px;
+}
+.labmem-modal-close {
+  background: none;
+  border: 0;
+  font-size: 22px;
+  color: #879596;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+.labmem-modal-close:hover {
+  color: #16191f;
+}
+.labmem-modal-body {
+  padding: 20px 24px;
+  display: grid;
+  gap: 16px;
+}
+.labmem-modal-field label {
+  display: block;
+  margin-bottom: 5px;
+  color: #545b64;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.labmem-modal-field input,
+.labmem-modal-field textarea,
+.labmem-modal-field select {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid #d5dbdb;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #16191f;
+  background: #fafafa;
+  outline: none;
+  transition: border-color .2s;
+  box-sizing: border-box;
+}
+.labmem-modal-field input:focus,
+.labmem-modal-field textarea:focus,
+.labmem-modal-field select:focus {
+  border-color: #0073bb;
+}
+.labmem-modal-field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+.labmem-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 24px 22px;
+}
+.labmem-modal-cancel {
+  padding: 9px 18px;
+  border: 1px solid #d5dbdb;
+  background: #fff;
+  border-radius: 8px;
+  color: #545b64;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+}
+.labmem-modal-cancel:hover {
+  background: #f2f3f3;
+}
+.labmem-modal-submit {
+  padding: 9px 22px;
+  border: 0;
+  background: #ff9900;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s;
+}
+.labmem-modal-submit:hover {
+  background: #ec7211;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 920px) {
+  .labmem-body {
+    grid-template-columns: 1fr;
+  }
+  .labmem-sidebar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .labmem-ai-panel {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 700px) {
+  .labmem-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .labmem-sidebar {
+    grid-template-columns: 1fr;
+  }
+  .labmem-onboarding-grid {
+    grid-template-columns: 1fr;
+  }
+  .labmem-header {
+    padding: 36px 0 24px;
+  }
+  .labmem-header-row {
+    flex-direction: column;
+  }
+}
+@media (max-width: 480px) {
+  .labmem-stats {
+    grid-template-columns: 1fr;
+  }
+}

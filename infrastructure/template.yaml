@@ -1,0 +1,819 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: BridgeBoard Collaborate MVP - Bedrock action plans and team updates.
+
+Parameters:
+  LambdaCodeBucket:
+    Type: String
+  LambdaCodeKey:
+    Type: String
+  ModelId:
+    Type: String
+    Default: us.anthropic.claude-sonnet-4-6
+  AllowedModels:
+    Type: CommaDelimitedList
+    Default: amazon.nova-lite-v1:0,us.amazon.nova-lite-v1:0,us.amazon.nova-2-lite-v1:0,us.anthropic.claude-opus-4-6-v1,us.anthropic.claude-sonnet-4-6,us.mistral.pixtral-large-2502-v1:0
+  FrontendOrigin:
+    Type: String
+    Default: http://localhost:5173
+  FacilitatorAgentArn:
+    Type: String
+    Default: ""
+
+Resources:
+  UpdatesTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub bridgeboard-updates-${AWS::AccountId}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Project
+          Value: BridgeBoard
+        - Key: Track
+          Value: Collaborate
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub bridgeboard-lambda-${AWS::Region}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: bridgeboard-runtime
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:GetItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Scan
+                Resource: !GetAtt UpdatesTable.Arn
+              - Effect: Allow
+                Action:
+                  - comprehend:DetectDominantLanguage
+                  - comprehend:DetectEntities
+                  - comprehend:DetectKeyPhrases
+                  - comprehend:DetectSentiment
+                  - comprehend:DetectPiiEntities
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - textract:DetectDocumentText
+                  - textract:AnalyzeDocument
+                  - textract:StartDocumentTextDetection
+                  - textract:GetDocumentTextDetection
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - translate:TranslateText
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - polly:SynthesizeSpeech
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - transcribe:StartTranscriptionJob
+                  - transcribe:GetTranscriptionJob
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource: !Sub "${MediaBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource:
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-lite-v1:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-opus-4-6-v1
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-sonnet-4-6
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/mistral.pixtral-large-2502-v1:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-2-lite-v1:0
+                  - arn:aws:bedrock:us-east-2::foundation-model/amazon.nova-2-lite-v1:0
+                  - arn:aws:bedrock:us-west-2::foundation-model/amazon.nova-2-lite-v1:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/us.amazon.nova-2-lite-v1:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.amazon.nova-2-lite-v1:0
+                  - arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-opus-4-6-v1
+                  - arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-opus-4-6-v1
+                  - arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-sonnet-4-6
+                  - arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-sonnet-4-6
+                  - arn:aws:bedrock:us-east-2::foundation-model/mistral.pixtral-large-2502-v1:0
+                  - arn:aws:bedrock:us-west-2::foundation-model/mistral.pixtral-large-2502-v1:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/us.amazon.nova-lite-v1:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/us.anthropic.claude-opus-4-6-v1
+                  - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/us.anthropic.claude-sonnet-4-6
+                  - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/us.mistral.pixtral-large-2502-v1:0
+              - Effect: Allow
+                Action:
+                  - bedrock:ApplyGuardrail
+                Resource: !GetAtt ContentSafetyGuardrail.GuardrailArn
+              - Effect: Allow
+                Action:
+                  - bedrock-agentcore:InvokeAgentRuntime
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - bedrock:Retrieve
+                  - bedrock:RetrieveAndGenerate
+                  - bedrock-agent-runtime:Retrieve
+                  - bedrock-agent-runtime:RetrieveAndGenerate
+                Resource: "*"
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: bridgeboard-users
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      UserPoolTags:
+        Project: BridgeBoard
+        Track: Collaborate
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: bridgeboard-web
+      GenerateSecret: false
+      EnableTokenRevocation: true
+      RefreshTokenRotation:
+        Feature: ENABLED
+        RetryGracePeriodSeconds: 60
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - profile
+      SupportedIdentityProviders:
+        - COGNITO
+      CallbackURLs:
+        - !Ref FrontendOrigin
+      LogoutURLs:
+        - !Ref FrontendOrigin
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub bridgeboard-${AWS::AccountId}
+      UserPoolId: !Ref UserPool
+
+  ActionApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: bridgeboard-api
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowHeaders:
+          - content-type
+          - authorization
+        AllowMethods:
+          - GET
+          - POST
+          - DELETE
+          - OPTIONS
+        AllowOrigins:
+          - !Ref FrontendOrigin
+
+  ApiAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref ActionApi
+      AuthorizerType: JWT
+      IdentitySource:
+        - $request.header.Authorization
+      JwtConfiguration:
+        Audience:
+          - !Ref UserPoolClient
+        Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
+      Name: bridgeboard-cognito
+
+  MediaBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - GET
+              - HEAD
+            AllowedOrigins:
+              - !Ref FrontendOrigin
+              - 'http://localhost:5173'
+              - 'http://localhost:4173'
+              - 'http://127.0.0.1:5173'
+            MaxAge: 3600
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireMedia
+            Status: Enabled
+            ExpirationInDays: 7
+
+  ContentSafetyGuardrail:
+    Type: AWS::Bedrock::Guardrail
+    Properties:
+      Name: !Sub bridgeboard-safety-${AWS::AccountId}
+      Description: Content safety guardrail for BridgeBoard AI - filters harmful content and prompt attacks
+      BlockedInputMessaging: "Your message was blocked by our content safety policy. Please rephrase your request to focus on research collaboration topics."
+      BlockedOutputsMessaging: "The AI response was filtered by our content safety guardrail. Please try rephrasing your query."
+      ContentPolicyConfig:
+        FiltersConfig:
+          - Type: SEXUAL
+            InputStrength: HIGH
+            OutputStrength: HIGH
+          - Type: VIOLENCE
+            InputStrength: HIGH
+            OutputStrength: HIGH
+          - Type: HATE
+            InputStrength: HIGH
+            OutputStrength: HIGH
+          - Type: INSULTS
+            InputStrength: MEDIUM
+            OutputStrength: HIGH
+          - Type: MISCONDUCT
+            InputStrength: HIGH
+            OutputStrength: HIGH
+      WordPolicyConfig:
+        ManagedWordListsConfig:
+          - Type: PROFANITY
+      SensitiveInformationPolicyConfig:
+        PiiEntitiesConfig:
+          - Type: US_SOCIAL_SECURITY_NUMBER
+            Action: BLOCK
+          - Type: CREDIT_DEBIT_CARD_NUMBER
+            Action: BLOCK
+          - Type: US_BANK_ACCOUNT_NUMBER
+            Action: BLOCK
+          - Type: AWS_ACCESS_KEY
+            Action: BLOCK
+          - Type: EMAIL
+            Action: ANONYMIZE
+      TopicPolicyConfig:
+        TopicsConfig:
+          - Name: harmful-research
+            Definition: Advice on creating biological weapons, chemical weapons, or other materials intended to cause mass harm
+            Type: DENY
+          - Name: academic-fraud
+            Definition: Requests to fabricate research data, forge citations, plagiarize work, or bypass ethical review boards
+            Type: DENY
+      Tags:
+        - Key: Project
+          Value: BridgeBoard
+
+  ContentSafetyGuardrailVersion:
+    Type: AWS::Bedrock::GuardrailVersion
+    Properties:
+      GuardrailIdentifier: !GetAtt ContentSafetyGuardrail.GuardrailArn
+      Description: v1 - initial content safety filters
+
+  BridgeBoardFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: bridgeboard-api
+      Runtime: python3.12
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Timeout: 60
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref UpdatesTable
+          MODEL_ID: !Ref ModelId
+          ALLOWED_MODELS: !Join [',', !Ref AllowedModels]
+          MEDIA_BUCKET: !Ref MediaBucket
+          FACILITATOR_AGENT_ARN: !Ref FacilitatorAgentArn
+          GUARDRAIL_ID: !GetAtt ContentSafetyGuardrail.GuardrailId
+          GUARDRAIL_VERSION: !GetAtt ContentSafetyGuardrailVersion.Version
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Ref LambdaCodeKey
+
+  ApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ActionApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt BridgeBoardFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  ApiRouteUpdatesGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /updates
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteUpdatesPost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /updates
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteActionPlan:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /action-plan
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteActionPlans:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /action-plans
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteResearchDiscussion:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /research/analyze-discussion
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteResearchCritic:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /research/critic
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteResearchContext:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /research/context
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteResearchFacilitator:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /research/facilitator
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteDiscussionMessagesGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /research/messages
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteDiscussionMessagesPost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /research/messages
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteDiscussionMessagesDelete:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: DELETE /research/messages
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteUploadUrl:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /research/upload-url
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteAgentCommand:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /research/agent-command
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteReactions:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /research/reactions
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteProfileGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /profile
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteProfilePost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /profile
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteUsers:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /users
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteRoomsGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /rooms
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteRoomsPost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /rooms
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteRoomsDelete:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: DELETE /rooms
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteRoomMeetingsGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /rooms/meetings
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteRoomMeetingsPost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /rooms/meetings
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteRoomMeetingsDelete:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: DELETE /rooms/meetings
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteRoomMeetingUpdate:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /rooms/meetings/update
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteIngestionTranslate:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /ingestion/translate
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteIngestionSpeak:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /ingestion/speak
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteIngestionTranscribePost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /ingestion/transcribe
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteIngestionTranscribeGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /ingestion/transcribe
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteLabMemoryGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /lab-memory
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteLabMemoryPost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /lab-memory
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteLabMemoryDelete:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: DELETE /lab-memory
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteExperimentsGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /experiments
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteExperimentsPost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /experiments
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteExperimentsDelete:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: DELETE /experiments
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteManuscriptsGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /manuscripts
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteManuscriptsPost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /manuscripts
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteManuscriptsDelete:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: DELETE /manuscripts
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteAdvisingUpdatesGet:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: GET /advising/updates
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiRouteAdvisingUpdatesPost:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ActionApi
+      RouteKey: POST /advising/updates
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
+      Target: !Sub integrations/${ApiIntegration}
+
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref ActionApi
+      StageName: '$default'
+      AutoDeploy: true
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 10
+
+  ApiInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref BridgeBoardFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ActionApi}/*/*
+
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: bridgeboard-s3-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  WebsiteDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        HttpVersion: http2
+        Origins:
+          - Id: bridgeboard-s3-origin
+            DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+            S3OriginConfig: {}
+        DefaultCacheBehavior:
+          TargetOriginId: bridgeboard-s3-origin
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${WebsiteBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${WebsiteDistribution}
+
+Outputs:
+  ApiUrl:
+    Description: HTTP API endpoint
+    Value: !GetAtt ActionApi.ApiEndpoint
+  WebsiteBucketName:
+    Description: Private S3 bucket for the frontend
+    Value: !Ref WebsiteBucket
+  CloudFrontUrl:
+    Description: Public HTTPS frontend URL
+    Value: !Sub https://${WebsiteDistribution.DomainName}
+  DynamoTableName:
+    Description: DynamoDB table for updates and plans
+    Value: !Ref UpdatesTable
+  UserPoolId:
+    Description: Cognito user pool ID
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Description: Public Cognito web app client ID
+    Value: !Ref UserPoolClient
+  CognitoHostedUiUrl:
+    Description: Cognito hosted sign-in URL
+    Value: !Sub https://bridgeboard-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com
